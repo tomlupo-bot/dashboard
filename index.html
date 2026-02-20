@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0b10">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVG9tIEV2b2x1dGlvbiIsInNob3J0X25hbWUiOiJFdm9sdXRpb24iLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBhMGIxMCIsInRoZW1lX2NvbG9yIjoiIzBhMGIxMCJ9">
 <title>Tom Evolution Dashboard</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -70,6 +74,13 @@ h3{font-size:14px;color:var(--text2);margin-bottom:8px;font-weight:500}
 .summary-item .val{font-size:20px;font-weight:700}
 .summary-item .lbl{font-size:10px;color:var(--text3);text-transform:uppercase}
 .summary-item .delta{font-size:11px;margin-top:2px}
+.activity-list{list-style:none;padding:0}
+.activity-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card2);border-radius:10px;margin-bottom:6px;font-size:13px}
+.activity-item .act-emoji{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.activity-item .act-info{flex:1;min-width:0}
+.activity-item .act-name{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.activity-item .act-meta{font-size:11px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.activity-item .act-date{font-size:11px;color:var(--text3);flex-shrink:0;text-align:right}
 .delta-up{color:var(--green)}
 .delta-down{color:var(--red)}
 .xp-timeline{display:grid;grid-template-columns:auto repeat(30,1fr);gap:1px;font-size:9px;overflow-x:auto}
@@ -139,6 +150,12 @@ h3{font-size:14px;color:var(--text2);margin-bottom:8px;font-weight:500}
   <div class="cal-grid" id="calGrid"></div>
 </div>
 
+<!-- Recent Activities -->
+<div class="card fade-in" style="animation-delay:.33s">
+  <h2>🏃 Recent Activities</h2>
+  <div class="activity-list" id="activityList"></div>
+</div>
+
 <!-- Workout Schedule -->
 <div class="card fade-in" style="animation-delay:.35s">
   <h2>🏋️ Workout Schedule</h2>
@@ -194,6 +211,20 @@ const HABITS = [
 
 const GARMIN = [{"date":"2026-02-20","steps":4727,"activeCal":109,"rhr":41,"stress":20,"bbHigh":94,"bbLow":32,"bbCurrent":70,"sleepSec":24480,"modMin":13,"vigMin":0},{"date":"2026-02-19","steps":2218,"activeCal":34,"rhr":46,"stress":28,"bbHigh":84,"bbLow":29,"bbCurrent":48,"sleepSec":27573,"modMin":0,"vigMin":0},{"date":"2026-02-18","steps":4447,"activeCal":258,"rhr":45,"stress":25,"bbHigh":77,"bbLow":16,"bbCurrent":36,"sleepSec":25670,"modMin":13,"vigMin":0},{"date":"2026-02-17","steps":2346,"activeCal":288,"rhr":48,"stress":36,"bbHigh":51,"bbLow":17,"bbCurrent":20,"sleepSec":28048,"modMin":26,"vigMin":0},{"date":"2026-02-16","steps":4635,"activeCal":295,"rhr":45,"stress":30,"bbHigh":86,"bbLow":33,"bbCurrent":33,"sleepSec":26836,"modMin":21,"vigMin":0},{"date":"2026-02-15","steps":4180,"activeCal":302,"rhr":43,"stress":22,"bbHigh":94,"bbLow":29,"bbCurrent":34,"sleepSec":25137,"modMin":16,"vigMin":0},{"date":"2026-02-14","steps":81,"activeCal":1,"rhr":42,"stress":13,"bbHigh":98,"bbLow":28,"bbCurrent":96,"sleepSec":30819,"modMin":0,"vigMin":0},{"date":"2026-02-13","steps":1047,"activeCal":171,"rhr":45,"stress":19,"bbHigh":84,"bbLow":32,"bbCurrent":61,"sleepSec":26292,"modMin":6,"vigMin":0},{"date":"2026-02-12","steps":9241,"activeCal":488,"rhr":43,"stress":27,"bbHigh":91,"bbLow":34,"bbCurrent":34,"sleepSec":27162,"modMin":19,"vigMin":5},{"date":"2026-02-10","steps":625,"activeCal":5,"rhr":37,"stress":12,"bbHigh":97,"bbLow":40,"bbCurrent":85,"sleepSec":20756,"modMin":0,"vigMin":0},{"date":"2026-02-09","steps":6850,"activeCal":115,"rhr":40,"stress":20,"bbHigh":98,"bbLow":17,"bbCurrent":43,"sleepSec":29073,"modMin":0,"vigMin":0},{"date":"2026-02-08","steps":10826,"activeCal":586,"rhr":46,"stress":33,"bbHigh":31,"bbLow":9,"bbCurrent":19,"sleepSec":15660,"modMin":47,"vigMin":0},{"date":"2026-02-07","steps":12449,"activeCal":527,"rhr":41,"stress":24,"bbHigh":95,"bbLow":13,"bbCurrent":43,"sleepSec":28980,"modMin":73,"vigMin":8},{"date":"2026-02-06","steps":2662,"activeCal":306,"rhr":40,"stress":14,"bbHigh":87,"bbLow":14,"bbCurrent":74,"sleepSec":23220,"modMin":0,"vigMin":0},{"date":"2026-02-05","steps":6397,"activeCal":261,"rhr":42,"stress":33,"bbHigh":97,"bbLow":20,"bbCurrent":38,"sleepSec":27529,"modMin":0,"vigMin":1},{"date":"2026-02-04","steps":4968,"activeCal":138,"rhr":43,"stress":36,"bbHigh":96,"bbLow":20,"bbCurrent":20,"sleepSec":27325,"modMin":0,"vigMin":0},{"date":"2026-02-03","steps":7537,"activeCal":419,"rhr":41,"stress":33,"bbHigh":99,"bbLow":18,"bbCurrent":23,"sleepSec":28694,"modMin":27,"vigMin":2},{"date":"2026-02-02","steps":8938,"activeCal":404,"rhr":44,"stress":26,"bbHigh":85,"bbLow":12,"bbCurrent":29,"sleepSec":26836,"modMin":29,"vigMin":1},{"date":"2026-02-01","steps":8616,"activeCal":511,"rhr":42,"stress":34,"bbHigh":86,"bbLow":13,"bbCurrent":13,"sleepSec":24712,"modMin":14,"vigMin":21},{"date":"2026-01-31","steps":7169,"activeCal":163,"rhr":40,"stress":29,"bbHigh":91,"bbLow":24,"bbCurrent":24,"sleepSec":26760,"modMin":0,"vigMin":0},{"date":"2026-01-30","steps":4249,"activeCal":157,"rhr":39,"stress":31,"bbHigh":99,"bbLow":19,"bbCurrent":26,"sleepSec":24366,"modMin":0,"vigMin":4},{"date":"2026-01-29","steps":12464,"activeCal":318,"rhr":40,"stress":27,"bbHigh":83,"bbLow":15,"bbCurrent":38,"sleepSec":23274,"modMin":48,"vigMin":0},{"date":"2026-01-28","steps":4587,"activeCal":184,"rhr":39,"stress":30,"bbHigh":100,"bbLow":19,"bbCurrent":19,"sleepSec":27598,"modMin":16,"vigMin":5},{"date":"2026-01-27","steps":14128,"activeCal":688,"rhr":41,"stress":23,"bbHigh":100,"bbLow":31,"bbCurrent":41,"sleepSec":29920,"modMin":35,"vigMin":10},{"date":"2026-01-26","steps":3389,"activeCal":169,"rhr":41,"stress":25,"bbHigh":79,"bbLow":7,"bbCurrent":41,"sleepSec":26362,"modMin":4,"vigMin":2},{"date":"2026-01-25","steps":12745,"activeCal":476,"rhr":40,"stress":37,"bbHigh":97,"bbLow":13,"bbCurrent":13,"sleepSec":27580,"modMin":6,"vigMin":0},{"date":"2026-01-24","steps":12737,"activeCal":474,"rhr":40,"stress":33,"bbHigh":87,"bbLow":15,"bbCurrent":20,"sleepSec":28940,"modMin":12,"vigMin":20},{"date":"2026-01-23","steps":9478,"activeCal":199,"rhr":39,"stress":32,"bbHigh":94,"bbLow":18,"bbCurrent":18,"sleepSec":24630,"modMin":0,"vigMin":0},{"date":"2026-01-22","steps":7675,"activeCal":241,"rhr":40,"stress":35,"bbHigh":100,"bbLow":19,"bbCurrent":19,"sleepSec":26020,"modMin":0,"vigMin":0},{"date":"2026-01-21","steps":6283,"activeCal":257,"rhr":41,"stress":34,"bbHigh":97,"bbLow":20,"bbCurrent":30,"sleepSec":28617,"modMin":20,"vigMin":6}];
 
+const ACTIVITIES = [
+  {name:"Warsaw Walking",type:"walking",start:"2026-02-20 14:34",dur:1247,dist:1730,cal:107,avgHR:82,maxHR:97},
+  {name:"Yoga",type:"yoga",start:"2026-02-20 09:00",dur:3602,dist:0,cal:73,avgHR:55,maxHR:92},
+  {name:"Alpe Lusia Ski Area Ski",type:"resort_skiing",start:"2026-02-18 09:08",dur:11449,dist:50746,cal:424,avgHR:72,maxHR:119},
+  {name:"Yoga",type:"yoga",start:"2026-02-18 07:44",dur:723,dist:0,cal:21,avgHR:68,maxHR:85},
+  {name:"Latemar Ski",type:"resort_skiing",start:"2026-02-17 10:03",dur:11268,dist:37032,cal:500,avgHR:78,maxHR:127},
+  {name:"Alpe Cermis - Cavalese Ski",type:"resort_skiing",start:"2026-02-16 08:59",dur:7847,dist:34346,cal:369,avgHR:78,maxHR:133},
+  {name:"Yoga",type:"yoga",start:"2026-02-16 07:44",dur:948,dist:0,cal:21,avgHR:57,maxHR:83},
+  {name:"Alpe Lusia Ski Area Ski",type:"resort_skiing",start:"2026-02-15 09:33",dur:11933,dist:40548,cal:456,avgHR:73,maxHR:114},
+  {name:"Strength",type:"strength_training",start:"2026-02-14 15:29",dur:2566,dist:0,cal:201,avgHR:98,maxHR:143},
+  {name:"Yoga",type:"yoga",start:"2026-02-14 09:02",dur:1020,dist:0,cal:24,avgHR:59,maxHR:87}
+];
+const TRAINING_READINESS = {score:77,level:"HIGH"};
+
 const TODAY_SLEEP = {score:77,deep:5520,rem:2700,light:16260,total:24480,hrvAvg:69};
 const TODAY_HRV = {weeklyAvg:66,lastNightAvg:69,high:114,status:"UNBALANCED"};
 
@@ -226,7 +257,8 @@ const vitalsHTML = [
   {lbl:'Body Battery',val:today.bbCurrent,sub:`${today.bbLow}–${today.bbHigh}`,color:today.bbCurrent>=60?'var(--green)':today.bbCurrent>=30?'var(--orange)':'var(--red)'},
   {lbl:'Resting HR',val:today.rhr+' bpm',sub:'7d avg: 45',color:today.rhr<=45?'var(--green)':today.rhr<=55?'var(--orange)':'var(--red)'},
   {lbl:'Avg Stress',val:today.stress,sub:today.stress<25?'Calm':today.stress<40?'Balanced':'High',color:today.stress<25?'var(--green)':today.stress<40?'var(--orange)':'var(--red)'},
-  {lbl:'Steps',val:today.steps.toLocaleString(),sub:`${today.activeCal} active cal`,color:today.steps>=7500?'var(--green)':today.steps>=5000?'var(--orange)':'var(--red)'}
+  {lbl:'Steps',val:today.steps.toLocaleString(),sub:`${today.activeCal} active cal`,color:today.steps>=7500?'var(--green)':today.steps>=5000?'var(--orange)':'var(--red)'},
+  {lbl:'Training Readiness',val:TRAINING_READINESS.score,sub:TRAINING_READINESS.level,color:TRAINING_READINESS.score>70?'var(--green)':TRAINING_READINESS.score>=40?'var(--orange)':'var(--red)'}
 ].map(v=>`<div class="vital"><div class="lbl">${v.lbl}</div><div class="val" style="color:${v.color}">${v.val}</div><div class="sub">${v.sub}</div></div>`).join('');
 document.getElementById('vitals').innerHTML = vitalsHTML;
 
