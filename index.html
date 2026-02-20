@@ -591,6 +591,30 @@ showWeek('A');
     <div class="summary-item"><div class="val">${s.val}</div><div class="lbl">${s.lbl}</div><div class="delta">${s.d}</div></div>
   `).join('');
 }
+
+// Recent Activities
+{
+  const emojiMap = {swimming:'🏊',strength_training:'🏋️',yoga:'🧘',cycling:'🚴',running:'🏃',resort_skiing:'⛷️',resort_snowboarding:'⛷️',walking:'🚶',hiking:'🏔️'};
+  const el = document.getElementById('activityList');
+  el.innerHTML = ACTIVITIES.map(a => {
+    const emoji = emojiMap[a.type] || '🏃';
+    const h = Math.floor(a.dur/3600), m = Math.round((a.dur%3600)/60);
+    const durStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+    const distStr = a.dist > 0 ? `${(a.dist/1000).toFixed(1)}km` : '';
+    const date = a.start.slice(5,10);
+    return `<div class="activity-item">
+      <div class="act-emoji">${emoji}</div>
+      <div class="act-info">
+        <div class="act-name">${a.name}</div>
+        <div class="act-meta">
+          <span>⏱ ${durStr}</span>${distStr?`<span>📏 ${distStr}</span>`:''}
+          <span>🔥 ${a.cal} cal</span><span>❤️ ${a.avgHR}/${a.maxHR}</span>
+        </div>
+      </div>
+      <div class="act-date">${date}</div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
